@@ -378,6 +378,11 @@
     state.page = 1;
     renderStats();
     renderMatches();
+
+    // 手机上输入区很长，点完「开始匹配」自动把结果滚到眼前
+    if (window.innerWidth <= 1000 && $("statbar").scrollIntoView) {
+      $("statbar").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
 
   var GRADE_ORDER = { "冲": 1, "稳": 2, "保": 3, "超保": 4, "风险": 5, "数据缺失": 6 };
