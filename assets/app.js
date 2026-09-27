@@ -971,6 +971,14 @@
   }
 
   function bindUI() {
+    // 勾选态：旧浏览器不支持 CSS :has()，这里用 class 兜底
+    Array.prototype.forEach.call(document.querySelectorAll(".chips input"), function (cb) {
+      var label = cb.parentNode;
+      var sync = function () { label.classList.toggle("on", cb.checked); };
+      cb.addEventListener("change", sync);
+      sync();
+    });
+
     $("btn-run").addEventListener("click", runMatch);
     $("btn-export-match").addEventListener("click", exportMatches);
     $("btn-export-plan").addEventListener("click", exportPlan);
@@ -1062,7 +1070,10 @@
 
       // 默认勾选一个常见组合，避免空手开始
       var checks = document.querySelectorAll("#in-second input");
-      Array.prototype.forEach.call(checks, function (c, i) { c.checked = i < 2; });
+      Array.prototype.forEach.call(checks, function (c, i) {
+        c.checked = i < 2;
+        c.parentNode.classList.toggle("on", c.checked);
+      });
 
       var total = GK.store.admissions.reduce(function (a, d) { return a + d.count; }, 0);
       $("headline").textContent = "湖北 " + (GK.store.meta ? GK.store.meta.years_available.join("/") : "") +

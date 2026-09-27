@@ -71,6 +71,7 @@ input[type="range"] { width: 100%; }
   border: 1px solid var(--line); border-radius: 999px; font-size: 13px; cursor: pointer;
   background: #fff;
 }
+.chips label.on,
 .chips label:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
 
 .btn {
