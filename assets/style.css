@@ -106,6 +106,7 @@ input[type="range"] { width: 100%; }
 .tab {
   padding: 9px 14px; border: none; background: transparent; cursor: pointer;
   font-size: 14px; color: var(--muted); border-bottom: 2px solid transparent;
+  white-space: nowrap;
 }
 .tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 600; }
 .badge {
@@ -218,6 +219,8 @@ table.grid.plan input { width: 100%; min-width: 62px; padding: 3px 5px; font-siz
   table.grid { font-size: 12px; }
   table.grid th, table.grid td { padding: 6px 7px; }
   .toolbar { gap: 6px; }
+  .tabs { overflow-x: auto; }
+  .tab { padding: 8px 11px; font-size: 13px; }
 }
 
 /* ============================ 打印：只打印志愿表 ============================ */
