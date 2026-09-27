@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>湖北（武汉）高考志愿工作台</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">志</span>
+    <div>
+      <h1>湖北（武汉）高考志愿工作台</h1>
+      <p class="sub" id="headline">数据加载中…</p>
+    </div>
+  </div>
+  <div class="head-actions">
+    <button class="btn ghost" id="btn-sources">数据来源</button>
+    <button class="btn ghost" id="btn-help">使用说明</button>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ============================ 左侧：输入 ============================ -->
+  <aside class="panel">
+    <h2>1. 考生情况</h2>
+
+    <label class="field">
+      <span>首选科目</span>
+      <select id="in-first">
+        <option value="物理类">物理类</option>
+        <option value="历史类">历史类</option>
+      </select>
+    </label>
+
+    <div class="field">
+      <span>再选科目（勾选 2 科）</span>
+      <div class="chips" id="in-second">
+        <label><input type="checkbox" value="化学" />化学</label>
+        <label><input type="checkbox" value="生物" />生物</label>
+        <label><input type="checkbox" value="思想政治" />思想政治</label>
+        <label><input type="checkbox" value="地理" />地理</label>
+      </div>
+    </div>
+
+    <label class="field">
+      <span>报考层次</span>
+      <select id="in-level">
+        <option value="本科">本科</option>
+        <option value="专科">高职高专</option>
+      </select>
+    </label>
+
+    <h2>2. 成绩定位</h2>
+
+    <label class="field">
+      <span>本次考试总分</span>
+      <input type="number" id="in-score" min="0" max="750" placeholder="例如 580" />
+    </label>
+
+    <label class="field">
+      <span>本次考试划线（可选）</span>
+      <input type="number" id="in-line" min="0" max="750" placeholder="学校/市里给的模拟本科线，例如 430" />
+      <small>高三模考一般会给"模拟划线"。填了它，跨年比较会更准；不填则使用参考年的官方批次线。</small>
+    </label>
+
+    <label class="field">
+      <span>全省位次（可选，有则优先用位次法）</span>
+      <input type="number" id="in-rank" min="1" placeholder="例如 32000" />
+    </label>
+
+    <label class="field">
+      <span>参考年份（用哪一年的投档线做对比）</span>
+      <select id="in-year"></select>
+      <small id="year-hint"></small>
+    </label>
+
+    <div class="readout" id="position-out"></div>
+
+    <h2>3. 筛选条件</h2>
+
+    <div class="field">
+      <span>院校层次（不勾选=全部）</span>
+      <div class="chips" id="in-tags">
+        <label><input type="checkbox" value="985" />985</label>
+        <label><input type="checkbox" value="211" />211</label>
+        <label><input type="checkbox" value="双一流" />双一流</label>
+        <label><input type="checkbox" value="普通本科" />普通本科</label>
+        <label><input type="checkbox" value="民办" />民办</label>
+      </div>
+    </div>
+
+    <label class="field">
+      <span>院校所在省份（留空=全国）</span>
+      <input type="text" id="in-provinces" placeholder="多个用顿号或逗号分隔，例如：湖北、湖南、江苏" />
+      <small>想留在武汉，就填「湖北」；只看武汉可以再打开下面的开关。</small>
+    </label>
+
+    <label class="field inline">
+      <input type="checkbox" id="in-wuhan" />
+      <span>只看武汉市内院校</span>
+    </label>
+
+    <label class="field inline">
+      <input type="checkbox" id="in-exclude-coop" checked />
+      <span>排除中外合作办学 / 高收费项目</span>
+    </label>
+
+    <label class="field inline">
+      <input type="checkbox" id="in-exclude-special" checked />
+      <span>排除国家专项 / 地方专项 / 民族班等特殊类型</span>
+    </label>
+
+    <label class="field inline">
+      <input type="checkbox" id="in-include-empty" />
+      <span>包含「无投档分」的专业组（往年缺额，参考价值低）</span>
+    </label>
+
+    <h2>4. 冲稳保档位</h2>
+    <p class="hint">以「参考年投档最低分」为基准，按分差划分。数值越大越保守。</p>
+    <div class="sliders">
+      <label class="field">
+        <span>冲：分差 ≥ <b id="v-chong">-10</b> 分</span>
+        <input type="range" id="in-chong" min="-40" max="0" value="-10" />
+      </label>
+      <label class="field">
+        <span>稳：分差 ≥ <b id="v-wen">0</b> 分</span>
+        <input type="range" id="in-wen" min="0" max="30" value="0" />
+      </label>
+      <label class="field">
+        <span>保：分差 ≥ <b id="v-bao">12</b> 分</span>
+        <input type="range" id="in-bao" min="5" max="60" value="12" />
+      </label>
+    </div>
+
+    <button class="btn primary wide" id="btn-run">开始匹配</button>
+  </aside>
+
+  <!-- ============================ 右侧：结果 ============================ -->
+  <section class="content">
+
+    <div class="statbar" id="statbar"></div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="match">匹配结果</button>
+      <button class="tab" data-tab="plan">我的志愿表 <span class="badge" id="plan-count">0</span></button>
+      <button class="tab" data-tab="sim">模拟投档</button>
+      <button class="tab" data-tab="quality">数据体检</button>
+    </div>
+
+    <!-- 匹配结果 -->
+    <div class="tabpane active" id="pane-match">
+      <div class="toolbar">
+        <span id="match-summary" class="muted">左侧填好信息后点「开始匹配」</span>
+        <span class="spacer"></span>
+        <label class="mini">
+          排序
+          <select id="in-sort">
+            <option value="grade">档位优先（冲→稳→保）</option>
+            <option value="gap">离我最近优先</option>
+            <option value="score">投档分从高到低</option>
+          </select>
+        </label>
+        <label class="mini">
+          每页
+          <select id="in-pagesize">
+            <option>50</option>
+            <option selected>100</option>
+            <option>200</option>
+            <option>500</option>
+          </select>
+          条
+        </label>
+        <button class="btn ghost" id="btn-export-match">导出匹配结果</button>
+      </div>
+      <div class="tablewrap">
+        <table class="grid" id="tbl-match">
+          <thead>
+            <tr>
+              <th class="sticky-l">院校专业组</th>
+              <th>省</th>
+              <th>选科要求</th>
+              <th class="num">参考年投档分</th>
+              <th class="num">我的分差</th>
+              <th class="num" id="th-trend-25">2025</th>
+              <th class="num" id="th-trend-24">2024</th>
+              <th>档位</th>
+              <th>备注</th>
+              <th class="op">操作</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-match"></tbody>
+        </table>
+      </div>
+      <div class="pager" id="pager-match"></div>
+    </div>
+
+    <!-- 志愿表 -->
+    <div class="tabpane" id="pane-plan">
+      <div class="toolbar">
+        <span id="plan-summary" class="muted">还没有加入志愿</span>
+        <span class="spacer"></span>
+        <button class="btn ghost" id="btn-sort-plan">按档位排序</button>
+        <button class="btn ghost" id="btn-clear-plan">清空</button>
+        <button class="btn" id="btn-export-plan">导出志愿表（CSV）</button>
+        <button class="btn" id="btn-print-plan">打印 / 存 PDF</button>
+      </div>
+      <div class="notice" id="plan-notice"></div>
+      <div class="tablewrap">
+        <table class="grid plan" id="tbl-plan">
+          <thead>
+            <tr>
+              <th class="num">志愿号</th>
+              <th>院校代号（待填）</th>
+              <th>专业组代号</th>
+              <th class="sticky-l2">院校专业组</th>
+              <th>选科要求</th>
+              <th class="num">参考投档分</th>
+              <th>档位</th>
+              <th>专业 1</th><th>专业 2</th><th>专业 3</th>
+              <th>专业 4</th><th>专业 5</th><th>专业 6</th>
+              <th>服从调剂</th>
+              <th class="op">操作</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-plan"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 模拟投档 -->
+    <div class="tabpane" id="pane-sim">
+      <div class="toolbar">
+        <span class="muted">按「分数（位次）优先、遵循志愿、一轮投档」模拟：从第 1 志愿起逐个检索，第一个够线的志愿即为投档结果。</span>
+        <span class="spacer"></span>
+        <button class="btn" id="btn-run-sim">运行模拟</button>
+      </div>
+      <div id="sim-out" class="simout"></div>
+    </div>
+
+    <!-- 数据体检 -->
+    <div class="tabpane" id="pane-quality">
+      <div id="quality-out"></div>
+    </div>
+
+  </section>
+</main>
+
+<footer class="foot">
+  <p id="foot-line">数据来源与免责声明见「数据来源」按钮。</p>
+</footer>
+
+<!-- ============================ 弹窗 ============================ -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modal-title">标题</h3>
+      <button class="btn ghost" id="modal-close">关闭</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script src="assets/gk.js"></script>
+<script src="data/index.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
